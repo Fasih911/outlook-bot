@@ -163,57 +163,57 @@ async def create_outlook_account(playwright, account):
 
         await page.click(next_button_selector)
 
-        print("Waiting for CAPTCHA iframe to appear...")
-        await page.wait_for_timeout(5000)
+        # print("Waiting for CAPTCHA iframe to appear...")
+        # await page.wait_for_timeout(5000)
 
-        iframe_element = await page.wait_for_selector('#game-core-frame', timeout=50000)
-        frame = await iframe_element.content_frame()
+        # iframe_element = await page.wait_for_selector('#game-core-frame', timeout=50000)
+        # frame = await iframe_element.content_frame()
 
-        print("Searching for puzzle button inside iframe...")
-        puzzle_button = await frame.wait_for_selector('.sc-nkuzb1-0.sc-d5trka-0.eZxMRy.button', timeout=10000)
-        await puzzle_button.click()
-        print("Clicked the 'Solve Puzzle' button.")
+        # print("Searching for puzzle button inside iframe...")
+        # puzzle_button = await frame.wait_for_selector('.sc-nkuzb1-0.sc-d5trka-0.eZxMRy.button', timeout=10000)
+        # await puzzle_button.click()
+        # print("Clicked the 'Solve Puzzle' button.")
 
-        print("Connecting to 2Captcha...")
-        api_key = "a04bfefc95683664081449b0270c2418"
-        sitekey = "i6209"
-        page_url = page.url
+        # print("Connecting to 2Captcha...")
+        # api_key = "a04bfefc95683664081449b0270c2418"
+        # sitekey = "i6209"
+        # page_url = page.url
 
-        print("📡 Sending CAPTCHA to 2Captcha...")
-        resp = httpx.post(
-            "http://2captcha.com/in.php",
-            data={
-                "key": api_key,
-                "method": "userrecaptcha",
-                "googlekey": sitekey,
-                "pageurl": page_url,
-                "json": 1
-            }
-        )
-        request_id = resp.json().get("request")
-        print(f"CAPTCHA submitted to 2Captcha. Request ID: {request_id}")
+        # print("📡 Sending CAPTCHA to 2Captcha...")
+        # resp = httpx.post(
+        #     "http://2captcha.com/in.php",
+        #     data={
+        #         "key": api_key,
+        #         "method": "userrecaptcha",
+        #         "googlekey": sitekey,
+        #         "pageurl": page_url,
+        #         "json": 1
+        #     }
+        # )
+        # request_id = resp.json().get("request")
+        # print(f"CAPTCHA submitted to 2Captcha. Request ID: {request_id}")
 
-        recaptcha_answer = None
-        for _ in range(20):
-            time.sleep(5)
-            res = httpx.get(f"http://2captcha.com/res.php?key={api_key}&action=get&id={request_id}&json=1")
-            if res.json().get("status") == 1:
-                recaptcha_answer = res.json().get("request")
-                print("CAPTCHA solved successfully.")
-                break
-            else:
-                print("Waiting for 2Captcha to solve...")
+        # recaptcha_answer = None
+        # for _ in range(20):
+        #     time.sleep(5)
+        #     res = httpx.get(f"http://2captcha.com/res.php?key={api_key}&action=get&id={request_id}&json=1")
+        #     if res.json().get("status") == 1:
+        #         recaptcha_answer = res.json().get("request")
+        #         print("CAPTCHA solved successfully.")
+        #         break
+        #     else:
+        #         print("Waiting for 2Captcha to solve...")
 
-        if not recaptcha_answer:
-            raise Exception("CAPTCHA was not solved in time.")
+        # if not recaptcha_answer:
+        #     raise Exception("CAPTCHA was not solved in time.")
 
-        print("Injecting CAPTCHA response token...")
-        await frame.evaluate(f'document.getElementById("g-recaptcha-response").innerHTML = "{recaptcha_answer}";')
-        await frame.evaluate('document.getElementById("g-recaptcha-response").dispatchEvent(new Event("change"));')
-        print("CAPTCHA token injected, submitting form...")
+        # print("Injecting CAPTCHA response token...")
+        # await frame.evaluate(f'document.getElementById("g-recaptcha-response").innerHTML = "{recaptcha_answer}";')
+        # await frame.evaluate('document.getElementById("g-recaptcha-response").dispatchEvent(new Event("change"));')
+        # print("CAPTCHA token injected, submitting form...")
 
-        await frame.click('button[type="submit"]')
-        print("CAPTCHA complete, continuing signup process...")
+        # await frame.click('button[type="submit"]')
+        # print("CAPTCHA complete, continuing signup process...")
 
         print("Browser left open for debugging. Close manually after checking.")
         input("Press ENTER after reviewing the browser manually...")
