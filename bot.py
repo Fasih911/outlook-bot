@@ -100,7 +100,7 @@ async def create_outlook_account(playwright, account):
         if not email_selector:
             raise Exception("⚠️ Email field not found!")
 
-        print(f"📨 Filling email: {account['email']}")
+        print(f"Filling email: {account['email']}")
         await page.fill(email_selector, account["email"])
         await page.mouse.wheel(0, random.randint(100, 300))
         await page.wait_for_timeout(random_delay())
@@ -110,45 +110,45 @@ async def create_outlook_account(playwright, account):
         next_button_selector = 'input[type="submit"], button[type="submit"]'
         await page.click(next_button_selector)
 
-        print("🔑 Waiting for password field...")
+        print("Waiting for password field...")
         await page.wait_for_selector('input[name="Password"]', timeout=15000)
 
-        print(f"🔒 Filling password: {account['password']}")
+        print(f"Filling password: {account['password']}")
         await page.fill('input[name="Password"]', account["password"])
         await page.mouse.wheel(0, random.randint(100, 300))
         await page.wait_for_timeout(random_delay())
 
-        print("➡️ Clicking Next for password...")
+        print("Clicking Next for password...")
         await page.click(next_button_selector)
 
-        print("👤 Waiting for first name and last name fields...")
+        print("Waiting for first name and last name fields...")
         await page.wait_for_selector('input[name="firstNameInput"], input[name="lastNameInput"]', timeout=15000)
 
-        print(f"📝 Filling first name: {account['first_name']}")
+        print(f"Filling first name: {account['first_name']}")
         first_name_input = await page.query_selector('input[name="firstNameInput"]')
         if first_name_input:
             await first_name_input.fill(account["first_name"])
             await page.mouse.wheel(0, random.randint(100, 300))
             await page.wait_for_timeout(random_delay())
 
-        print(f"📝 Filling last name: {account['last_name']}")
+        print(f"Filling last name: {account['last_name']}")
         last_name_input = await page.query_selector('input[name="lastNameInput"]')
         if last_name_input:
             await last_name_input.fill(account["last_name"])
             await page.mouse.wheel(0, random.randint(100, 300))
             await page.wait_for_timeout(random_delay())
 
-        print("➡️ Clicking Next after filling names...")
+        print("Clicking Next after filling names...")
         await page.click(next_button_selector)
 
         country = random.choice(countries)
-        print(f"🌍 Selecting country: {country}")
+        print(f"Selecting country: {country}")
         await page.select_option('select#countryRegionDropdown', label=country)
         await page.mouse.wheel(0, random.randint(100, 300))
         await page.wait_for_timeout(random_delay())
 
         month, day, year = get_random_birthdate()
-        print(f"📅 Selecting birthdate: {month} {day}, {year}")
+        print(f"Selecting birthdate: {month} {day}, {year}")
         await page.select_option('select[name="BirthMonth"]', label=month)
         await page.mouse.wheel(0, random.randint(100, 300))
         await page.wait_for_timeout(random_delay())
@@ -163,18 +163,18 @@ async def create_outlook_account(playwright, account):
 
         await page.click(next_button_selector)
 
-        print("🧠 Waiting for CAPTCHA iframe to appear...")
+        print("Waiting for CAPTCHA iframe to appear...")
         await page.wait_for_timeout(5000)
 
         iframe_element = await page.wait_for_selector('#game-core-frame', timeout=50000)
         frame = await iframe_element.content_frame()
 
-        print("🧩 Searching for puzzle button inside iframe...")
+        print("Searching for puzzle button inside iframe...")
         puzzle_button = await frame.wait_for_selector('.sc-nkuzb1-0.sc-d5trka-0.eZxMRy.button', timeout=10000)
         await puzzle_button.click()
-        print("🧩 Clicked the 'Solve Puzzle' button.")
+        print("Clicked the 'Solve Puzzle' button.")
 
-        print("🔄 Connecting to 2Captcha...")
+        print("Connecting to 2Captcha...")
         api_key = "a04bfefc95683664081449b0270c2418"
         sitekey = "i6209"
         page_url = page.url
@@ -191,7 +191,7 @@ async def create_outlook_account(playwright, account):
             }
         )
         request_id = resp.json().get("request")
-        print(f"📨 CAPTCHA submitted to 2Captcha. Request ID: {request_id}")
+        print(f"CAPTCHA submitted to 2Captcha. Request ID: {request_id}")
 
         recaptcha_answer = None
         for _ in range(20):
@@ -199,28 +199,28 @@ async def create_outlook_account(playwright, account):
             res = httpx.get(f"http://2captcha.com/res.php?key={api_key}&action=get&id={request_id}&json=1")
             if res.json().get("status") == 1:
                 recaptcha_answer = res.json().get("request")
-                print("✅ CAPTCHA solved successfully.")
+                print("CAPTCHA solved successfully.")
                 break
             else:
-                print("⏳ Waiting for 2Captcha to solve...")
+                print("Waiting for 2Captcha to solve...")
 
         if not recaptcha_answer:
-            raise Exception("❌ CAPTCHA was not solved in time.")
+            raise Exception("CAPTCHA was not solved in time.")
 
-        print("🔧 Injecting CAPTCHA response token...")
+        print("Injecting CAPTCHA response token...")
         await frame.evaluate(f'document.getElementById("g-recaptcha-response").innerHTML = "{recaptcha_answer}";')
         await frame.evaluate('document.getElementById("g-recaptcha-response").dispatchEvent(new Event("change"));')
-        print("🚀 CAPTCHA token injected, submitting form...")
+        print("CAPTCHA token injected, submitting form...")
 
         await frame.click('button[type="submit"]')
-        print("🎉 CAPTCHA complete, continuing signup process...")
+        print("CAPTCHA complete, continuing signup process...")
 
-        print("🛑 Browser left open for debugging. Close manually after checking.")
-        input("🧠 Press ENTER after reviewing the browser manually...")
+        print("Browser left open for debugging. Close manually after checking.")
+        input("Press ENTER after reviewing the browser manually...")
 
     except Exception as e:
-        print(f"❌ Error for {account['email']}: {str(e)}")
-        input("🧠 Press ENTER after reviewing the browser manually...")
+        print(f"Error for {account['email']}: {str(e)}")
+        input("Press ENTER after reviewing the browser manually...")
 
     await browser.close()
 
